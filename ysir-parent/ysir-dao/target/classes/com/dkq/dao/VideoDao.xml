@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dkq.dao.VideoDao">
+
+    <resultMap id="VideoMap" type="Video">
+        <id column="id" property="id"/>
+        <result column="speaker_id" property="speaker_id"/>
+        <result column="course_id" property="course_id"/>
+        <association property="speaker" javaType="Speaker">
+            <id column="id" property="id"/>
+            <result column="speaker_name" property="speaker_name"/>
+            <result column="speaker_desc" property="speaker_desc"/>
+            <result column="speaker_job" property="speaker_job"/>
+            <result column="head_img_url" property="head_img_url"/>
+        </association>
+        <association property="course" javaType="Course">
+            <id column="id" property="id"/>
+            <result column="course_title" property="course_title"/>
+            <result column="course_desc" property="course_desc"/>
+            <result column="subject_id" property="subject_id"/>
+        </association>
+    </resultMap>
+
+    <sql id="videoQueryVo">
+        <where>
+            <if test="title != null and title != ''">
+                and title like concat('%',#{title},'%')
+            </if>
+            <if test="speakerId != null and speakerId !=''">
+                and speaker_id = #{speakerId}
+            </if>
+            <if test="courseId != null and courseId != ''">
+                and course_id = #{courseId}
+            </if>
+        </where>
+    </sql>
+    <!--查询所有-->
+    <select id="queryVideoByQueryVo"  resultMap="VideoMap">
+        select
+        *
+        from video v
+        LEFT join speaker s on v.speaker_id = s.id
+        <include refid="videoQueryVo"/>
+        <if test="start != null">
+            LIMIT #{start}, #{rows}
+        </if>
+    </select>
+
+    <resultMap id="videoMap1" type="Video">
+        <result property="id" column="id"/>
+        <association property="speaker" javaType="Speaker">
+            <id property="id" column="id"/>
+            <result property="speaker_desc" column="speaker_desc"/>
+            <result property="speaker_name" column="speaker_name"/>
+        </association>
+    </resultMap>
+    <!--根据id查询视频-->
+    <select id="queryVideoMapById" resultMap="videoMap1">
+        select
+        v.video_url,v.image_url,v.title,v.detail, s.speaker_name,s.speaker_desc
+        from
+        video v, speaker s
+        where
+        v.speaker_id = s.id
+        and v.id = #{id};
+    </select>
+    <!--查询总数-->
+    <select id="queryCountByQueryVo" parameterType="QueryVo" resultType="Integer">
+        select
+        count(1)
+        from
+        video v
+        LEFT join speaker s on v.speaker_id = s.id
+        <include refid="videoQueryVo"/>
+    </select>
+    <!--根据id查询-->
+    <resultMap id="videoMap2" type="Video">
+        <result property="id" column="vid"/>
+        <association property="speaker" javaType="Speaker">
+            <id property="id" column="sid"/>
+            <result property="speaker_desc" column="speaker_desc"/>
+            <result property="speaker_name" column="speaker_name"/>
+        </association>
+        <association property="course" javaType="Course">
+            <id property="id" column="sid"/>
+        </association>
+    </resultMap>
+    <select id="queryVideoById" resultMap="videoMap2">
+        select
+        c.id cid, c.*,s.id sid, s.*,v.id vid,v.*
+        from video v,speaker s,course c
+        where v.speaker_id = s.id
+        and v.course_id = c.id
+        and v.id = #{id}
+    </select>
+    <!--添加视频-->
+    <insert id="saveVideo">
+        insert into video
+        (title, detail, time, speaker_id, course_id, video_url, image_url, play_num)
+        values
+        (#{title}, #{detail}, #{time}, #{speaker_id}, #{course_id}, #{video_url}, #{image_url}, #{play_num});
+    </insert>
+    <!--修改视频-->
+    <update id="updateVideo">
+        update video set
+        <if test="title != null and title != ''">
+            title = #{title},
+        </if>
+        <if test="time != null and time != ''">
+            time = #{time},
+        </if>
+        <if test="speaker_id != null and speaker_id != ''">
+            speaker_id = #{speaker_id},
+        </if>
+        <if test="course_id != null and course_id != ''">
+            course_id = #{course_id},
+        </if>
+        <if test="video_url != null and video_url != ''">
+            video_url = #{video_url},
+        </if>
+        <if test="play_num != null and play_num != ''">
+            play_num = #{play_num},
+        </if>
+        id = #{id}
+        where video.id = #{id}
+    </update>
+    <!--删除视频-->
+    <delete id="videoDel">
+        delete from video where id = #{id};
+    </delete>
+
+</mapper>

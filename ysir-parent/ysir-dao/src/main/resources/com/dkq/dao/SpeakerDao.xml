@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dkq.dao.SpeakerDao">
+    <!--根据querySpeakerVo查询总数-->
+    <select id="querySpeaker" resultType="Speaker" >
+        select * from speaker
+        <if test="start != null">
+            LIMIT #{start}, #{rows}
+        </if>
+    </select>
+    <!--根据querySpeakerVo查询总数量-->
+    <select id="queryCount" resultType="Integer" >
+        select count(1) from speaker s where s.id;
+    </select>
+
+    <!--根据id查找-->
+    <select id="querySpeakerById" resultType="Speaker">
+        select * from speaker where id = #{id};
+    </select>
+
+
+    <select id="queryAllSpeaker" resultType="Speaker">
+        select * from speaker;
+    </select>
+
+    <select id="querySpeakerNameById" resultType="Speaker">
+        select
+        speaker_name
+        from
+        speaker
+        <if test="id != null || id != ''">
+            <where>
+                id = #{id};
+            </where>
+        </if>
+    </select>
+
+    <!--添加讲师-->
+    <insert id="saveSpeaker" >
+        insert into speaker (speaker_name, speaker_desc, speaker_job, head_img_url)
+        values (#{speaker_name},#{speaker_desc},#{speaker_job},#{head_img_url});
+    </insert>
+    <!--删除讲师-->
+    <delete id="delSpeakerById">
+        delete from Speaker where id = #{id};
+    </delete>
+    <!--修改讲师-->
+    <update id="editSpeaker">
+        update speaker set
+        <if test="speaker_name != null and speaker_name != ''">
+            speaker_name = #{speaker_name},
+        </if>
+        <if test="speaker_desc != null and speaker_desc != ''">
+            speaker_desc = #{speaker_desc},
+        </if>
+        <if test="speaker_job != null and speaker_job != ''">
+            speaker_job = #{speaker_job},
+        </if>
+        <if test="head_img_url != null and head_img_url != ''">
+            head_img_url = #{head_img_url}
+        </if>
+            id = #{id}
+        where speaker.id = #{id}
+    </update>
+</mapper>

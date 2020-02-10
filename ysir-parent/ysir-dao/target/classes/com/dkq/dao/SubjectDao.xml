@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dkq.dao.SubjectDao">
+    <select id="querySubject" resultType="Subject">
+        select * from subject;
+    </select>
+
+    <select id="querySubjectById" resultType="Subject">
+        select * from subject where id = #{id};
+    </select>
+
+    
+    
+    <resultMap id="courseAndVideo" type="Subject">
+        <id column="sid" property="id"/>
+        <collection property="courseList" ofType="Course">
+            <id property="id" column="cid"/>
+            <collection property="videoList" ofType="Video">
+                <id property="id" column="vid"/>
+            </collection>
+        </collection>
+    </resultMap>
+    <select id="querySubjectByCourse" resultMap="courseAndVideo">
+        select
+        s.id sid,s.*,
+        v.id vid,v.*,
+        c.id cid,c.*
+        FROM subject s, video v, course c
+        where
+        s.id = #{id}
+        and v.course_id = c.id
+        and c.subject_id = s.id
+    </select>
+</mapper>

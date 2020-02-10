@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dkq.dao.CourseDao">
+
+    <select id="queryAllCourse" resultType="Course">
+        select * from course;
+    </select>
+
+    <resultMap id="courseMap" type="Course">
+        <id column="id" property="id"/>
+        <result column="subject_id" property="subject_id"/>
+        <association property="subject" javaType="Subject">
+            <id column="id" property="id"/>
+            <result column="subject_name" property="subject_name"/>
+        </association>
+    </resultMap>
+    
+    
+    <resultMap id="VideoAndSpeaker" type="Course">
+        <id column="cid" property="id"/>
+        <association property="speaker" javaType="Speaker">
+            <id column="sid" property="id"/>
+        </association>
+        <collection property="videoList" ofType="Video">
+            <id column="vid" property="id"/>
+        </collection>
+    </resultMap>
+    <select id="queryCourseVideoByCid" resultMap="VideoAndSpeaker">
+        select
+        c.id cid, c.*,
+        s.id sid, s.*,
+        v.id vid, v.*
+        from
+        course c, speaker s, video v
+        where c.id = v.course_id
+        and s.id = v.speaker_id
+        and c.id = #{cid}
+    </select>
+
+    <select id="queryCourseQueryVo" resultMap="courseMap">
+        select
+        *
+        from course, subject
+        where course.subject_id = subject.id
+        <if test="start != null">
+            LIMIT #{start}, #{rows}
+        </if>
+    </select>
+
+    <select id="queryCountByQueryVo" parameterType="QueryVo" resultType="Integer">
+        select
+        count(1)
+        from
+        course
+    </select>
+
+    <select id="queryCourseById" resultType="Course">
+        select * from course where id = #{id};
+    </select>
+
+    <insert id="saveCourse">
+        insert into course (course_title, course_desc, subject_id)
+        values (#{course_title},#{course_desc},#{subject_id});
+    </insert>
+
+    <delete id="courseDel">
+        delete from course where id = #{id} ;
+    </delete>
+
+    <update id="editCourse">
+        update course set
+        <if test="course_title != null and course_title != ''">
+            course_title = #{course_title},
+        </if>
+        <if test="course_desc != null and course_desc != ''">
+            course_desc = #{course_desc},
+        </if>
+        <if test="subject_id != null and subject_id != ''">
+            subject_id = #{subject_id},
+        </if>
+        id = #{id}
+        where id = #{id};
+    </update>
+
+</mapper>
